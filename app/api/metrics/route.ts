@@ -163,7 +163,7 @@ export async function GET(req: NextRequest) {
 
     const funnelData = [
       { step: "1. Leads Criados / Entrada", count: totalVolume, color: "#3B82F6" },
-      { step: "2. Em Ativações (Follow-up)", count: ativacoes, color: "#06B6D4" },
+      { step: "2. Em Ativacoes (Follow-up)", count: ativacoes, color: "#06B6D4" },
       { step: "3. Leads Resgatados", count: resgatados, color: "#F59E0B" },
       { step: "4. Consultas Agendadas", count: agendados, color: "#8B5CF6" },
       { step: "5. Consultas Realizadas", count: realizados, color: "#10B981" },
@@ -180,7 +180,7 @@ export async function GET(req: NextRequest) {
         realizados: { value: realizados, label: "Consultas Realizadas", rate: `${taxaComparecimento}% show-up` },
         perdidos: { value: perdidos, label: "Leads Perdidos", rate: `${taxaPerda}% de perda` },
         contato_futuro: { value: contatoFuturo, label: "Contato Futuro", rate: `${contatoFuturo} agendados` },
-        ativacoes: { value: ativacoes, label: "Em Ativação (1 a 5)", rate: "Régua de follow-up" },
+        ativacoes: { value: ativacoes, label: "Em Ativacao (1 a 5)", rate: "Regua de follow-up" },
       },
       funnel: funnelData,
       recentLeads: formattedLeads.slice(0, 50),
