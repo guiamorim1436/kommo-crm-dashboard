@@ -2,7 +2,7 @@
 import { supabase } from "@/lib/supabase";
 
 const STATUS_MAP: Record<string, { name: string; type: string }> = {
-  "111394679": { name: "Etapa de leads de entrada", type: "entry" },
+  "111394679": { name: "Etapa de leads de entrada", type: "created" },
   "111394683": { name: "Em Atendimento & Para atender Hoje", type: "created" },
   "111394687": { name: "Contato Futuro", type: "future_contact" },
   "111394691": { name: "Resgatados", type: "rescued" },
@@ -96,7 +96,7 @@ export async function POST(req: NextRequest) {
       if (!isRescued && oldStatusId && ACTIVATION_STATUS_IDS.includes(oldStatusId) && (statusId === "111394683" || statusId === "111394691")) {
         isRescued = true;
         eventType = "rescued";
-      } else if (metricParam === "criados" || lead._action === "add" || statusId === "111394683") {
+      } else if (metricParam === "criados" || lead._action === "add" || statusId === "111394679" || statusId === "111394683") {
         eventType = "created";
       }
 
@@ -152,3 +152,4 @@ export async function GET(req: NextRequest) {
     metric_received: searchParams.get("metric") || "all",
   });
 }
+
