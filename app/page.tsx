@@ -95,7 +95,7 @@ export default function Dashboard() {
                 </span>
               </div>
               <p className="text-xs md:text-sm text-slate-400 mt-0.5">
-                Dashboard Comercial &bull; Performance do Funil e Conversão de Leads
+                Dashboard Comercial &bull; Performance do Funil e Conversao de Leads
               </p>
             </div>
           </div>
@@ -134,7 +134,7 @@ export default function Dashboard() {
           {/* Botoes de periodo rapido */}
           <div className="flex flex-wrap items-center gap-1.5">
             <span className="text-xs font-semibold text-slate-400 mr-2 flex items-center gap-1.5">
-              <Calendar className="w-3.5 h-3.5 text-emerald-400" /> Período:
+              <Calendar className="w-3.5 h-3.5 text-emerald-400" /> Periodo:
             </span>
             {[
               { id: "all", label: "Tudo" },
@@ -142,7 +142,7 @@ export default function Dashboard() {
               { id: "7d", label: "7 Dias" },
               { id: "15d", label: "15 Dias" },
               { id: "30d", label: "30 Dias" },
-              { id: "this_month", label: "Este Mês" },
+              { id: "this_month", label: "Este Mes" },
             ].map((btn) => (
               <button
                 key={btn.id}
@@ -215,7 +215,7 @@ export default function Dashboard() {
           {/* 2. Em Ativações */}
           <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 hover:border-cyan-500/40 transition">
             <div className="flex items-center justify-between text-cyan-400 mb-2">
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Em Ativação (1-5)</span>
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Em Ativacao (1-5)</span>
               <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center">
                 <Clock className="w-4 h-4 text-cyan-400" />
               </div>
@@ -224,7 +224,7 @@ export default function Dashboard() {
               {metrics.ativacoes?.value ?? 0}
             </div>
             <p className="text-xs text-cyan-400/90 mt-2 font-medium">
-              Régua de follow-up
+              Regua de follow-up
             </p>
           </div>
 
@@ -299,7 +299,7 @@ export default function Dashboard() {
             <div>
               <h2 className="text-lg font-bold text-white flex items-center gap-2">
                 <TrendingUp className="w-5 h-5 text-emerald-400" />
-                Funil de Conversão Comercial
+                Funil de Conversao Comercial
               </h2>
               <p className="text-xs text-slate-400 mt-1">
                 Acompanhamento visual de todas as etapas de atendimento, ativações e consultas
@@ -341,7 +341,7 @@ export default function Dashboard() {
                 Leads do CRM ({filteredLeads.length})
               </h2>
               <p className="text-xs text-slate-400 mt-0.5">
-                Últimos contatos sincronizados diretamente da sua conta Kommo CRM
+                Ultimos contatos sincronizados diretamente da sua conta Kommo CRM
               </p>
             </div>
 
@@ -364,7 +364,7 @@ export default function Dashboard() {
               >
                 <option value="all">Todos os Status</option>
                 <option value="criados">Entrada / Atendimento</option>
-                <option value="ativacoes">Em Ativação (1-5)</option>
+                <option value="ativacoes">Em Ativacao (1-5)</option>
                 <option value="resgatados">Resgatados</option>
                 <option value="agendados">Consultas Agendadas</option>
                 <option value="realizados">Consultas Realizadas</option>
