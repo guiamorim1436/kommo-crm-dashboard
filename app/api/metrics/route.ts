@@ -2,9 +2,10 @@
 
 const KOMMO_TOKEN = process.env.KOMMO_ACCESS_TOKEN || "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6IjM0ZDY2YjhiZDc5YzkyYWZkYzg2N2Q2Njg2YWYxOGU0ODcxNzRmMmFmNzQ0YWQ2MTZmMDRlMzYxMTgxNjdkNDk4YmFjZjYzMmNmOWU3Y2VmIn0.eyJhdWQiOiIyZmVhMWEzYy1lZjFiLTQxYWQtYWY5Yi1lMTc3NjIyNGFiZDkiLCJqdGkiOiIzNGQ2NmI4YmQ3OWM5MmFmZGM4NjdkNjY4NmFmMThlNDg3MTc0ZjJhZjc0NGFkNjE2ZjA0ZTM2MTE4MTY3ZDQ5OGJhY2Y2MzJjZjllN2NlZiIsImlhdCI6MTc5MDEwMjcxMCwibmJmIjoxNzkwMTAyNzEwLCJleHAiOjE5NDc4MDE2MDAsInN1YiI6IjExNzQ0MDg3IiwiZ3JhbnRfdHlwZSI6IiIsImFjY291bnRfaWQiOjMzNTQwMjkxLCJiYXNlX2RvbWFpbiI6ImtvbW1vLmNvbSIsInZlcnNpb24iOjIsInNjb3BlcyI6WyJjcm0iLCJmaWxlcyIsImZpbGVzX2RlbGV0ZSIsImxpc3RfZXh0ZXJuYWxfbWVzc2FnZXMiLCJub3RpZmljYXRpb25zIiwicHVzaF9ub3RpZmljYXRpb25zIiwic2VuZF9leHRlcm5hbF9tZXNzYWdlcyIsInVzZXJzX2FjdGl2YXRlIiwidXNlcnNfYWRkIiwidXNlcnNfZGVhY3RpdmF0ZSJdLCJoYXNoX3V1aWQiOiIzMjM2NzI3Mi1jODNiLTRkMWMtYjU4NS03MWYxNjIzN2NiZjIiLCJhcGlfZG9tYWluIjoiYXBpLWMua29tbW8uY29tIn0.IPbXJPTe_sPjIIrumz_kuCVOMZy1mbXvhP95VVP1rYYAN6p-oaPjT_0DWqhx7EmOviD18tYtz5qZFqtiEQDBpn2FLlDvgbSOhbFGuVneP0o3Krre_zE3xbk6qyN9aG7IEhDN_NCTyXGCJErKp5m6FB67JYcibcDWlYTxBBMvesah86Vq8XKQql9uyEwTkBW1rkaeLXq13F2FfmLHpCGSLSg-hn0bh-ZI-YCC_8t4F-XXmXL2M5fhdB35fOmXsTvB-0LsJ_6bmXOY4gYICDKWoey-nDfoqgRm-jnM-6foHrWOqV976ZK7nGRkVpI9Fy5lsNf0uICrBQdlviHglikpwg";
 const KOMMO_DOMAIN = "drluiseduardobarbosa.kommo.com";
+const TARGET_PIPELINE_ID = 14421751; // Funil Upscale Unificado
 
+// Estagios exclusivos do Funil Upscale Unificado
 const STAGES: Record<number, { name: string; category: string }> = {
-  // Funil Upscale Unificado (14421751)
   111394679: { name: "Etapa de leads de entrada", category: "criados" },
   111394683: { name: "Em Atendimento & Para atender Hoje", category: "criados" },
   111394687: { name: "Contato Futuro", category: "contato_futuro" },
@@ -16,51 +17,20 @@ const STAGES: Record<number, { name: string; category: string }> = {
   111396575: { name: "5a Ativacao", category: "ativacoes" },
   111396579: { name: "Consulta Agendada", category: "agendados" },
   111396583: { name: "Consulta Realizada", category: "realizados" },
-
-  // UpScale Leticia (13018635)
-  100387015: { name: "Etapa de leads de entrada", category: "criados" },
-  100387019: { name: "Em atendimento & PARA ATENDER HOJE", category: "criados" },
-  100387619: { name: "CONTATO FUTURO", category: "contato_futuro" },
-  100387023: { name: "RESGATADOS", category: "resgatados" },
-  100387027: { name: "1a INTERACAO", category: "ativacoes" },
-  100387359: { name: "2a INTERACAO", category: "ativacoes" },
-  100387363: { name: "3a INTERACAO", category: "ativacoes" },
-  100387607: { name: "4a INTERACAO", category: "ativacoes" },
-  100387611: { name: "5a INTERACAO", category: "ativacoes" },
-  100387623: { name: "CONSULTA AGENDADA A PAGAR", category: "agendados" },
-  100387627: { name: "CONSULTA AGENDADA PAGA", category: "agendados" },
-
-  // UpScale Carla (13018891)
-  100388931: { name: "Etapa de leads de entrada", category: "criados" },
-  100388935: { name: "Em atendimento & PARA ATENDER HOJE", category: "criados" },
-  100389263: { name: "CONTATO FUTURO", category: "contato_futuro" },
-  100388939: { name: "RESGATADOS", category: "resgatados" },
-  100388943: { name: "1a INTERACAO", category: "ativacoes" },
-  100389243: { name: "2a INTERACAO", category: "ativacoes" },
-  100389247: { name: "3a INTERACAO", category: "ativacoes" },
-  100389251: { name: "4a INTERACAO", category: "ativacoes" },
-  100389255: { name: "5a INTERACAO", category: "ativacoes" },
-  100389267: { name: "CONSULTA AGENDADA A PAGAR", category: "agendados" },
-  100389271: { name: "CONSULTA AGENDADA PAGA", category: "agendados" },
-
-  // Padroes do Kommo
+  111396587: { name: "Outros Contatos (nao Pacientes)", category: "other" },
   142: { name: "Venda Ganha / Realizada", category: "realizados" },
   143: { name: "Perdidos", category: "perdidos" },
 };
 
-async function fetchKommoLeads(pipelineId: string) {
+async function fetchPipelineLeads() {
   try {
-    let url = `https://${KOMMO_DOMAIN}/api/v4/leads?limit=250`;
-    if (pipelineId && pipelineId !== "all") {
-      url += `&filter[pipeline_id]=${pipelineId}`;
-    }
-
+    const url = `https://${KOMMO_DOMAIN}/api/v4/leads?limit=250&filter[pipeline_id]=${TARGET_PIPELINE_ID}`;
     const res = await fetch(url, {
       headers: {
         Authorization: `Bearer ${KOMMO_TOKEN}`,
         "Content-Type": "application/json",
       },
-      next: { revalidate: 10 },
+      next: { revalidate: 5 },
     });
 
     if (!res.ok) return [];
@@ -74,24 +44,13 @@ async function fetchKommoLeads(pipelineId: string) {
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const pipeline = searchParams.get("pipeline") || "all";
     const period = searchParams.get("period") || "all";
     const startDateParam = searchParams.get("startDate");
     const endDateParam = searchParams.get("endDate");
 
-    let allLeads: any[] = [];
-    if (pipeline === "all") {
-      const [pUnificado, pLeticia, pCarla] = await Promise.all([
-        fetchKommoLeads("14421751"),
-        fetchKommoLeads("13018635"),
-        fetchKommoLeads("13018891"),
-      ]);
-      allLeads = [...pUnificado, ...pLeticia, ...pCarla];
-    } else {
-      allLeads = await fetchKommoLeads(pipeline);
-    }
+    const allLeads = await fetchPipelineLeads();
 
-    // Date filtering
+    // Filtro por Data
     let startTimestamp: number | null = null;
     let endTimestamp: number | null = null;
 
@@ -146,7 +105,7 @@ export async function GET(req: NextRequest) {
         status_id: statusId,
         status_name: stageInfo.name,
         category: stageInfo.category,
-        pipeline_id: l.pipeline_id,
+        pipeline_id: TARGET_PIPELINE_ID,
         price: l.price || 0,
         is_rescued: stageInfo.category === "resgatados",
         created_at: l.created_at ? new Date(l.created_at * 1000).toISOString() : new Date().toISOString(),
@@ -154,16 +113,17 @@ export async function GET(req: NextRequest) {
     });
 
     const totalVolume = filteredLeads.length;
-    const totalCriados = criados > 0 ? criados : totalVolume;
+    // Total de leads criados = todos os leads que entraram no funil
+    const totalCriados = totalVolume;
 
-    const taxaResgate = totalCriados > 0 ? ((resgatados / totalCriados) * 100).toFixed(1) : "0";
+    const taxaResgate = ativacoes + resgatados > 0 ? ((resgatados / (ativacoes + resgatados)) * 100).toFixed(1) : "0";
     const taxaAgendamento = totalCriados > 0 ? ((agendados / totalCriados) * 100).toFixed(1) : "0";
     const taxaComparecimento = agendados > 0 ? ((realizados / agendados) * 100).toFixed(1) : "0";
     const taxaPerda = totalCriados > 0 ? ((perdidos / totalCriados) * 100).toFixed(1) : "0";
 
     const funnelData = [
-      { step: "1. Leads Criados / Entrada", count: totalVolume, color: "#3B82F6" },
-      { step: "2. Em Ativacoes (Follow-up)", count: ativacoes, color: "#06B6D4" },
+      { step: "1. Leads Criados / Entrada", count: totalCriados, color: "#3B82F6" },
+      { step: "2. Em Ativacoes (1 a 5)", count: ativacoes, color: "#06B6D4" },
       { step: "3. Leads Resgatados", count: resgatados, color: "#F59E0B" },
       { step: "4. Consultas Agendadas", count: agendados, color: "#8B5CF6" },
       { step: "5. Consultas Realizadas", count: realizados, color: "#10B981" },
@@ -171,19 +131,20 @@ export async function GET(req: NextRequest) {
     ];
 
     return NextResponse.json({
-      is_live_crm: true,
+      pipeline_name: "Funil Upscale Unificado",
+      pipeline_id: TARGET_PIPELINE_ID,
       total_crm_leads: totalVolume,
       metrics: {
-        criados: { value: totalCriados, label: "Leads Criados", change: `${totalVolume} totais` },
-        resgatados: { value: resgatados, label: "Leads Resgatados", rate: `${taxaResgate}% taxa de resgate` },
+        criados: { value: totalCriados, label: "Leads Criados", change: `${totalCriados} no funil` },
+        resgatados: { value: resgatados, label: "Leads Resgatados", rate: `${taxaResgate}% de resgate` },
         agendados: { value: agendados, label: "Consultas Agendadas", rate: `${taxaAgendamento}% agendados` },
-        realizados: { value: realizados, label: "Consultas Realizadas", rate: `${taxaComparecimento}% show-up` },
-        perdidos: { value: perdidos, label: "Leads Perdidos", rate: `${taxaPerda}% de perda` },
+        realizados: { value: realizados, label: "Consultas Realizadas", rate: `${taxaComparecimento}% comparecimento` },
+        perdidos: { value: perdidos, label: "Leads Perdidos", rate: `${taxaPerda}% perda` },
         contato_futuro: { value: contatoFuturo, label: "Contato Futuro", rate: `${contatoFuturo} agendados` },
-        ativacoes: { value: ativacoes, label: "Em Ativacao (1 a 5)", rate: "Regua de follow-up" },
+        ativacoes: { value: ativacoes, label: "Em Ativacao (1 a 5)", rate: "Régua de follow-up" },
       },
       funnel: funnelData,
-      recentLeads: formattedLeads.slice(0, 50),
+      recentLeads: formattedLeads,
     });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
