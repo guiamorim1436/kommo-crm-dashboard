@@ -11,14 +11,13 @@ import {
   TrendingUp,
   Activity,
   Search,
-  Layers,
-  Calendar
+  Calendar,
+  Layers
 } from "lucide-react";
 
 export default function Dashboard() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [pipeline, setPipeline] = useState("all");
   const [period, setPeriod] = useState("all");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -28,7 +27,7 @@ export default function Dashboard() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      let url = `/api/metrics?pipeline=${pipeline}&period=${period}`;
+      let url = `/api/metrics?period=${period}`;
       if (startDate && endDate) {
         url += `&startDate=${startDate}&endDate=${endDate}`;
       }
@@ -44,7 +43,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchData();
-  }, [pipeline, period]);
+  }, [period]);
 
   const handleApplyCustomDates = () => {
     if (startDate && endDate) {
@@ -95,26 +94,17 @@ export default function Dashboard() {
                 </span>
               </div>
               <p className="text-xs md:text-sm text-slate-400 mt-0.5">
-                Dashboard Comercial &bull; Performance do Funil e Conversao de Leads
+                Dashboard Comercial &bull; Performance e Conversão de Leads
               </p>
             </div>
           </div>
 
-          {/* Filtros Superiores: Funil & Botao Atualizar */}
-          <div className="flex flex-wrap items-center gap-3">
-            {/* Seletor de Funil */}
-            <div className="flex items-center gap-2 bg-slate-900/90 border border-slate-800 rounded-xl px-3 py-2 text-xs">
-              <Layers className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-              <select
-                value={pipeline}
-                onChange={(e) => setPipeline(e.target.value)}
-                className="bg-transparent text-xs text-white focus:outline-none cursor-pointer pr-1 font-medium"
-              >
-                <option value="all" className="bg-slate-900 text-white">Todos os Funis UpScale (Consolidado)</option>
-                <option value="14421751" className="bg-slate-900 text-white">Funil Upscale Unificado</option>
-                <option value="13018635" className="bg-slate-900 text-white">UpScale Leticia</option>
-                <option value="13018891" className="bg-slate-900 text-white">UpScale Carla</option>
-              </select>
+          {/* Badges de Funil e Atualizar */}
+          <div className="flex items-center gap-3">
+            {/* Indicador Fixo do Funil Upscale Unificado */}
+            <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2 text-xs font-semibold text-slate-200">
+              <Layers className="w-4 h-4 text-emerald-400" />
+              <span>Funil Upscale Unificado</span>
             </div>
 
             {/* Botao Atualizar */}
@@ -129,12 +119,12 @@ export default function Dashboard() {
           </div>
         </header>
 
-        {/* Barra de Filtro de Datas Completo */}
+        {/* Barra de Filtro de Datas */}
         <section className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          {/* Botoes de periodo rapido */}
+          {/* Atalhos de periodo */}
           <div className="flex flex-wrap items-center gap-1.5">
             <span className="text-xs font-semibold text-slate-400 mr-2 flex items-center gap-1.5">
-              <Calendar className="w-3.5 h-3.5 text-emerald-400" /> Periodo:
+              <Calendar className="w-3.5 h-3.5 text-emerald-400" /> Período:
             </span>
             {[
               { id: "all", label: "Tudo" },
@@ -142,7 +132,7 @@ export default function Dashboard() {
               { id: "7d", label: "7 Dias" },
               { id: "15d", label: "15 Dias" },
               { id: "30d", label: "30 Dias" },
-              { id: "this_month", label: "Este Mes" },
+              { id: "this_month", label: "Este Mês" },
             ].map((btn) => (
               <button
                 key={btn.id}
@@ -162,7 +152,7 @@ export default function Dashboard() {
             ))}
           </div>
 
-          {/* Selecao personalizada por Data Inicial e Final */}
+          {/* Selecao personalizada por Calendario */}
           <div className="flex items-center gap-2">
             <input
               type="date"
@@ -194,7 +184,7 @@ export default function Dashboard() {
           </div>
         </section>
 
-        {/* Grid de Cards KPI (Metricas Principais) */}
+        {/* Grid de Cards KPI (5 Metricas Principais + Ativacoes + Contato Futuro) */}
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
           {/* 1. Leads Criados */}
           <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 hover:border-blue-500/40 transition">
@@ -208,14 +198,14 @@ export default function Dashboard() {
               {metrics.criados?.value ?? 0}
             </div>
             <p className="text-xs text-blue-400 mt-2 font-medium">
-              {metrics.criados?.change || "Volume no período"}
+              {metrics.criados?.change || "Total no funil"}
             </p>
           </div>
 
-          {/* 2. Em Ativações */}
+          {/* 2. Em Ativações (1 a 5) */}
           <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 hover:border-cyan-500/40 transition">
             <div className="flex items-center justify-between text-cyan-400 mb-2">
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Em Ativacao (1-5)</span>
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Em Ativação (1-5)</span>
               <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center">
                 <Clock className="w-4 h-4 text-cyan-400" />
               </div>
@@ -224,7 +214,7 @@ export default function Dashboard() {
               {metrics.ativacoes?.value ?? 0}
             </div>
             <p className="text-xs text-cyan-400/90 mt-2 font-medium">
-              Regua de follow-up
+              Régua de follow-up
             </p>
           </div>
 
@@ -293,16 +283,16 @@ export default function Dashboard() {
           </div>
         </section>
 
-        {/* Funil Visual de Conversao */}
+        {/* Funil Visual */}
         <section className="bg-slate-900/70 border border-slate-800 rounded-2xl p-6">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-lg font-bold text-white flex items-center gap-2">
                 <TrendingUp className="w-5 h-5 text-emerald-400" />
-                Funil de Conversao Comercial
+                Funil de Conversão Comercial
               </h2>
               <p className="text-xs text-slate-400 mt-1">
-                Acompanhamento visual de todas as etapas de atendimento, ativações e consultas
+                Visualização do fluxo de leads do Funil Upscale Unificado
               </p>
             </div>
           </div>
@@ -332,16 +322,16 @@ export default function Dashboard() {
           </div>
         </section>
 
-        {/* Tabela de Leads com Filtros */}
+        {/* Tabela de Leads Reais */}
         <section className="bg-slate-900/70 border border-slate-800 rounded-2xl p-6 space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h2 className="text-lg font-bold text-white flex items-center gap-2">
                 <Users className="w-5 h-5 text-blue-400" />
-                Leads do CRM ({filteredLeads.length})
+                Leads do Funil ({filteredLeads.length})
               </h2>
               <p className="text-xs text-slate-400 mt-0.5">
-                Ultimos contatos sincronizados diretamente da sua conta Kommo CRM
+                Contatos sincronizados do Funil Upscale Unificado
               </p>
             </div>
 
@@ -350,7 +340,7 @@ export default function Dashboard() {
                 <Search className="w-4 h-4 text-slate-500 absolute left-3 top-2.5" />
                 <input
                   type="text"
-                  placeholder="Buscar por nome do lead..."
+                  placeholder="Buscar por nome..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 w-48 sm:w-60"
@@ -364,7 +354,7 @@ export default function Dashboard() {
               >
                 <option value="all">Todos os Status</option>
                 <option value="criados">Entrada / Atendimento</option>
-                <option value="ativacoes">Em Ativacao (1-5)</option>
+                <option value="ativacoes">Em Ativação (1-5)</option>
                 <option value="resgatados">Resgatados</option>
                 <option value="agendados">Consultas Agendadas</option>
                 <option value="realizados">Consultas Realizadas</option>
@@ -388,7 +378,7 @@ export default function Dashboard() {
                 {filteredLeads.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="text-center py-8 text-slate-500">
-                      Nenhum lead encontrado com os filtros selecionados.
+                      Nenhum lead encontrado neste período no Funil Upscale Unificado.
                     </td>
                   </tr>
                 ) : (
