@@ -4,7 +4,7 @@ const KOMMO_TOKEN = process.env.KOMMO_ACCESS_TOKEN || "eyJ0eXAiOiJKV1QiLCJhbGciO
 const KOMMO_DOMAIN = "drluiseduardobarbosa.kommo.com";
 const TARGET_PIPELINE_ID = 14421751; // Funil Upscale Unificado
 
-// Estagios exclusivos do Funil Upscale Unificado
+// Mapeamento dos Estagios
 const STAGES: Record<number, { name: string; category: string }> = {
   111394679: { name: "Etapa de leads de entrada", category: "criados" },
   111394683: { name: "Em Atendimento & Para atender Hoje", category: "criados" },
@@ -22,6 +22,8 @@ const STAGES: Record<number, { name: string; category: string }> = {
   143: { name: "Perdidos", category: "perdidos" },
 };
 
+const ACTIVATION_IDS = [111396559, 111396563, 111396567, 111396571, 111396575];
+
 async function fetchPipelineLeads() {
   try {
     const url = `https://${KOMMO_DOMAIN}/api/v4/leads?limit=250&filter[pipeline_id]=${TARGET_PIPELINE_ID}`;
@@ -30,12 +32,29 @@ async function fetchPipelineLeads() {
         Authorization: `Bearer ${KOMMO_TOKEN}`,
         "Content-Type": "application/json",
       },
-      next: { revalidate: 5 },
+      next: { revalidate: 2 },
     });
-
     if (!res.ok) return [];
     const json = await res.json();
     return json?._embedded?.leads || [];
+  } catch (err) {
+    return [];
+  }
+}
+
+async function fetchStatusEvents() {
+  try {
+    const url = `https://${KOMMO_DOMAIN}/api/v4/events?filter[entity]=lead&filter[type]=lead_status_changed&limit=250`;
+    const res = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${KOMMO_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+      next: { revalidate: 2 },
+    });
+    if (!res.ok) return [];
+    const json = await res.json();
+    return json?._embedded?.events || [];
   } catch (err) {
     return [];
   }
@@ -48,12 +67,27 @@ export async function GET(req: NextRequest) {
     const startDateParam = searchParams.get("startDate");
     const endDateParam = searchParams.get("endDate");
 
-    const allLeads = await fetchPipelineLeads();
+    const [allLeads, allEvents] = await Promise.all([
+      fetchPipelineLeads(),
+      fetchStatusEvents(),
+    ]);
+
+    // Montar mapa historico de persistencia por lead: id -> Set<status_id>
+    const leadHistoryMap = new Map<number, Set<number>>();
+    for (const evt of allEvents) {
+      const leadId = Number(evt.entity_id);
+      const toStatusId = Number(evt?.value_after?.[0]?.lead_status?.id);
+      if (leadId && toStatusId) {
+        if (!leadHistoryMap.has(leadId)) {
+          leadHistoryMap.set(leadId, new Set<number>());
+        }
+        leadHistoryMap.get(leadId)!.add(toStatusId);
+      }
+    }
 
     // Filtro por Data
     let startTimestamp: number | null = null;
     let endTimestamp: number | null = null;
-
     const now = new Date();
     if (startDateParam && endDateParam) {
       startTimestamp = Math.floor(new Date(startDateParam + "T00:00:00").getTime() / 1000);
@@ -79,51 +113,65 @@ export async function GET(req: NextRequest) {
       return true;
     });
 
+    // Metricas Cumulativas com Persistencia Historica
     let criados = 0;
+    let ativacoes = 0;
     let resgatados = 0;
     let agendados = 0;
     let realizados = 0;
     let perdidos = 0;
     let contatoFuturo = 0;
-    let ativacoes = 0;
 
     const formattedLeads = filteredLeads.map((l: any) => {
-      const statusId = Number(l.status_id);
-      const stageInfo = STAGES[statusId] || { name: `Status ${statusId}`, category: "other" };
+      const leadId = Number(l.id);
+      const currentStatusId = Number(l.status_id);
+      const stageInfo = STAGES[currentStatusId] || { name: `Status ${currentStatusId}`, category: "other" };
 
-      if (stageInfo.category === "criados") criados++;
-      else if (stageInfo.category === "resgatados") resgatados++;
-      else if (stageInfo.category === "agendados") agendados++;
-      else if (stageInfo.category === "realizados") realizados++;
-      else if (stageInfo.category === "perdidos") perdidos++;
-      else if (stageInfo.category === "contato_futuro") contatoFuturo++;
-      else if (stageInfo.category === "ativacoes") ativacoes++;
+      // Obter todos os status por onde esse lead ja passou
+      const pastStatuses = leadHistoryMap.get(leadId) || new Set<number>();
+      pastStatuses.add(currentStatusId);
+
+      // Verificacoes persistentes
+      const hasTouchedCriados = true; // Todo lead no funil foi criado nele
+      const hasTouchedAtivacoes = ACTIVATION_IDS.some((id) => pastStatuses.has(id));
+      const hasTouchedResgatados = pastStatuses.has(111394691);
+      const hasTouchedAgendados = pastStatuses.has(111396579);
+      const hasTouchedRealizados = pastStatuses.has(111396583) || pastStatuses.has(142);
+      const hasTouchedPerdidos = currentStatusId === 143;
+      const hasTouchedContatoFuturo = pastStatuses.has(111394687);
+
+      if (hasTouchedCriados) criados++;
+      if (hasTouchedAtivacoes) ativacoes++;
+      if (hasTouchedResgatados) resgatados++;
+      if (hasTouchedAgendados) agendados++;
+      if (hasTouchedRealizados) realizados++;
+      if (hasTouchedPerdidos) perdidos++;
+      if (hasTouchedContatoFuturo) contatoFuturo++;
 
       return {
-        id: l.id,
+        id: leadId,
         name: l.name || "Lead sem nome",
-        status_id: statusId,
+        status_id: currentStatusId,
         status_name: stageInfo.name,
         category: stageInfo.category,
         pipeline_id: TARGET_PIPELINE_ID,
         price: l.price || 0,
-        is_rescued: stageInfo.category === "resgatados",
+        is_rescued: hasTouchedResgatados,
+        has_scheduled: hasTouchedAgendados,
+        has_completed: hasTouchedRealizados,
+        history: Array.from(pastStatuses),
         created_at: l.created_at ? new Date(l.created_at * 1000).toISOString() : new Date().toISOString(),
       };
     });
 
-    const totalVolume = filteredLeads.length;
-    // Total de leads criados = todos os leads que entraram no funil
-    const totalCriados = totalVolume;
-
-    const taxaResgate = ativacoes + resgatados > 0 ? ((resgatados / (ativacoes + resgatados)) * 100).toFixed(1) : "0";
-    const taxaAgendamento = totalCriados > 0 ? ((agendados / totalCriados) * 100).toFixed(1) : "0";
-    const taxaComparecimento = agendados > 0 ? ((realizados / agendados) * 100).toFixed(1) : "0";
-    const taxaPerda = totalCriados > 0 ? ((perdidos / totalCriados) * 100).toFixed(1) : "0";
+    const taxaResgate = ativacoes > 0 ? ((resgatados / ativacoes) * 100).toFixed(1) : resgatados > 0 ? "100.0" : "0.0";
+    const taxaAgendamento = criados > 0 ? ((agendados / criados) * 100).toFixed(1) : "0.0";
+    const taxaComparecimento = agendados > 0 ? ((realizados / agendados) * 100).toFixed(1) : realizados > 0 ? "100.0" : "0.0";
+    const taxaPerda = criados > 0 ? ((perdidos / criados) * 100).toFixed(1) : "0.0";
 
     const funnelData = [
-      { step: "1. Leads Criados / Entrada", count: totalCriados, color: "#3B82F6" },
-      { step: "2. Em Ativacoes (1 a 5)", count: ativacoes, color: "#06B6D4" },
+      { step: "1. Leads Criados", count: criados, color: "#3B82F6" },
+      { step: "2. Em Ativacao (1 a 5)", count: ativacoes, color: "#06B6D4" },
       { step: "3. Leads Resgatados", count: resgatados, color: "#F59E0B" },
       { step: "4. Consultas Agendadas", count: agendados, color: "#8B5CF6" },
       { step: "5. Consultas Realizadas", count: realizados, color: "#10B981" },
@@ -133,15 +181,15 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       pipeline_name: "Funil Upscale Unificado",
       pipeline_id: TARGET_PIPELINE_ID,
-      total_crm_leads: totalVolume,
+      total_crm_leads: filteredLeads.length,
       metrics: {
-        criados: { value: totalCriados, label: "Leads Criados", change: `${totalCriados} no funil` },
-        resgatados: { value: resgatados, label: "Leads Resgatados", rate: `${taxaResgate}% de resgate` },
-        agendados: { value: agendados, label: "Consultas Agendadas", rate: `${taxaAgendamento}% agendados` },
-        realizados: { value: realizados, label: "Consultas Realizadas", rate: `${taxaComparecimento}% comparecimento` },
-        perdidos: { value: perdidos, label: "Leads Perdidos", rate: `${taxaPerda}% perda` },
-        contato_futuro: { value: contatoFuturo, label: "Contato Futuro", rate: `${contatoFuturo} agendados` },
-        ativacoes: { value: ativacoes, label: "Em Ativacao (1 a 5)", rate: "Régua de follow-up" },
+        criados: { value: criados, label: "Leads Criados", change: "Persistente (Total criado)" },
+        resgatados: { value: resgatados, label: "Leads Resgatados", rate: `${taxaResgate}% de resgate (persistente)` },
+        agendados: { value: agendados, label: "Consultas Agendadas", rate: `${taxaAgendamento}% agendados (persistente)` },
+        realizados: { value: realizados, label: "Consultas Realizadas", rate: `${taxaComparecimento}% show-up (persistente)` },
+        perdidos: { value: perdidos, label: "Leads Perdidos", rate: `${taxaPerda}% de perda` },
+        contato_futuro: { value: contatoFuturo, label: "Contato Futuro", rate: `${contatoFuturo} contatos passados` },
+        ativacoes: { value: ativacoes, label: "Passaram por Ativacao", rate: "Régua de follow-up" },
       },
       funnel: funnelData,
       recentLeads: formattedLeads,
