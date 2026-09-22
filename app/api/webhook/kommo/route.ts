@@ -45,6 +45,9 @@ function parseKommoFormData(rawBody: string): any {
 
 export async function POST(req: NextRequest) {
   try {
+    const { searchParams } = new URL(req.url);
+    const metricParam = searchParams.get("metric");
+
     const contentType = req.headers.get("content-type") || "";
     let data: any = {};
 
@@ -61,8 +64,6 @@ export async function POST(req: NextRequest) {
         data = parseKommoFormData(rawText);
       }
     }
-
-    console.log("Kommo Webhook payload:", JSON.stringify(data));
 
     const leadsStatus = data?.leads?.status || [];
     const leadsAdd = data?.leads?.add || [];
@@ -89,18 +90,17 @@ export async function POST(req: NextRequest) {
       const responsibleId = lead.responsible_user_id ? Number(lead.responsible_user_id) : null;
 
       const statusMeta = STATUS_MAP[statusId] || { name: `Status ${statusId}`, type: "unknown" };
-      let eventType = statusMeta.type;
+      let eventType = metricParam || statusMeta.type;
 
-      let isRescued = false;
-      if (statusId === "111394691" || (oldStatusId && ACTIVATION_STATUS_IDS.includes(oldStatusId) && (statusId === "111394683" || statusId === "111394691"))) {
+      let isRescued = metricParam === "resgatados" || statusId === "111394691";
+      if (!isRescued && oldStatusId && ACTIVATION_STATUS_IDS.includes(oldStatusId) && (statusId === "111394683" || statusId === "111394691")) {
         isRescued = true;
         eventType = "rescued";
-      } else if (lead._action === "add" || statusId === "111394683") {
+      } else if (metricParam === "criados" || lead._action === "add" || statusId === "111394683") {
         eventType = "created";
       }
 
-      // Upsert lead in Supabase
-      const { error: leadErr } = await supabase.from("leads").upsert(
+      await supabase.from("leads").upsert(
         {
           id: leadId,
           name: leadName,
@@ -116,12 +116,7 @@ export async function POST(req: NextRequest) {
         { onConflict: "id" }
       );
 
-      if (leadErr) {
-        console.error("Error upserting lead:", leadErr);
-      }
-
-      // Insert into lead_events history
-      const { error: eventErr } = await supabase.from("lead_events").insert({
+      await supabase.from("lead_events").insert({
         lead_id: leadId,
         event_type: eventType,
         from_status_id: oldStatusId ? Number(oldStatusId) : null,
@@ -129,13 +124,9 @@ export async function POST(req: NextRequest) {
         metadata: {
           lead_name: leadName,
           price: price,
-          raw_status: statusMeta.name,
+          metric_param: metricParam,
         },
       });
-
-      if (eventErr) {
-        console.error("Error logging event:", eventErr);
-      }
 
       processed.push({ id: leadId, eventType, statusName: statusMeta.name });
     }
@@ -146,7 +137,6 @@ export async function POST(req: NextRequest) {
       processed,
     });
   } catch (error: any) {
-    console.error("Webhook processing error:", error);
     return NextResponse.json(
       { success: false, error: error?.message || "Internal error" },
       { status: 500 }
@@ -154,10 +144,11 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
   return NextResponse.json({
     status: "online",
     message: "Kommo CRM Webhook endpoint está ativo!",
-    expected_pipeline: 14421751,
+    metric_received: searchParams.get("metric") || "all",
   });
 }
