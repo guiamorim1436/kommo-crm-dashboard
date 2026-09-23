@@ -1,23 +1,22 @@
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 const KOMMO_TOKEN = process.env.KOMMO_ACCESS_TOKEN || "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6IjM0ZDY2YjhiZDc5YzkyYWZkYzg2N2Q2Njg2YWYxOGU0ODcxNzRmMmFmNzQ0YWQ2MTZmMDRlMzYxMTgxNjdkNDk4YmFjZjYzMmNmOWU3Y2VmIn0.eyJhdWQiOiIyZmVhMWEzYy1lZjFiLTQxYWQtYWY5Yi1lMTc3NjIyNGFiZDkiLCJqdGkiOiIzNGQ2NmI4YmQ3OWM5MmFmZGM4NjdkNjY4NmFmMThlNDg3MTc0ZjJhZjc0NGFkNjE2ZjA0ZTM2MTE4MTY3ZDQ5OGJhY2Y2MzJjZjllN2NlZiIsImlhdCI6MTc5MDEwMjcxMCwibmJmIjoxNzkwMTAyNzEwLCJleHAiOjE5NDc4MDE2MDAsInN1YiI6IjExNzQ0MDg3IiwiZ3JhbnRfdHlwZSI6IiIsImFjY291bnRfaWQiOjMzNTQwMjkxLCJiYXNlX2RvbWFpbiI6ImtvbW1vLmNvbSIsInZlcnNpb24iOjIsInNjb3BlcyI6WyJjcm0iLCJmaWxlcyIsImZpbGVzX2RlbGV0ZSIsImxpc3RfZXh0ZXJuYWxfbWVzc2FnZXMiLCJub3RpZmljYXRpb25zIiwicHVzaF9ub3RpZmljYXRpb25zIiwic2VuZF9leHRlcm5hbF9tZXNzYWdlcyIsInVzZXJzX2FjdGl2YXRlIiwidXNlcnNfYWRkIiwidXNlcnNfZGVhY3RpdmF0ZSJdLCJoYXNoX3V1aWQiOiIzMjM2NzI3Mi1jODNiLTRkMWMtYjU4NS03MWYxNjIzN2NiZjIiLCJhcGlfZG9tYWluIjoiYXBpLWMua29tbW8uY29tIn0.IPbXJPTe_sPjIIrumz_kuCVOMZy1mbXvhP95VVP1rYYAN6p-oaPjT_0DWqhx7EmOviD18tYtz5qZFqtiEQDBpn2FLlDvgbSOhbFGuVneP0o3Krre_zE3xbk6qyN9aG7IEhDN_NCTyXGCJErKp5m6FB67JYcibcDWlYTxBBMvesah86Vq8XKQql9uyEwTkBW1rkaeLXq13F2FfmLHpCGSLSg-hn0bh-ZI-YCC_8t4F-XXmXL2M5fhdB35fOmXsTvB-0LsJ_6bmXOY4gYICDKWoey-nDfoqgRm-jnM-6foHrWOqV976ZK7nGRkVpI9Fy5lsNf0uICrBQdlviHglikpwg";
 const KOMMO_DOMAIN = "drluiseduardobarbosa.kommo.com";
-const TARGET_PIPELINE_ID = 14421751; // Funil Upscale Unificado
+const TARGET_PIPELINE_ID = 14421751;
 
-// Mapeamento dos Estagios
 const STAGES: Record<number, { name: string; category: string }> = {
   111394679: { name: "Etapa de leads de entrada", category: "criados" },
   111394683: { name: "Em Atendimento & Para atender Hoje", category: "criados" },
   111394687: { name: "Contato Futuro", category: "contato_futuro" },
   111394691: { name: "Resgatados", category: "resgatados" },
-  111396559: { name: "1a Ativacao", category: "ativacoes" },
-  111396563: { name: "2a Ativacao", category: "ativacoes" },
-  111396567: { name: "3a Ativacao", category: "ativacoes" },
-  111396571: { name: "4a Ativacao", category: "ativacoes" },
-  111396575: { name: "5a Ativacao", category: "ativacoes" },
+  111396559: { name: "1\u00AA Ativa\u00E7\u00E3o", category: "ativacoes" },
+  111396563: { name: "2\u00AA Ativa\u00E7\u00E3o", category: "ativacoes" },
+  111396567: { name: "3\u00AA Ativa\u00E7\u00E3o", category: "ativacoes" },
+  111396571: { name: "4\u00AA Ativa\u00E7\u00E3o", category: "ativacoes" },
+  111396575: { name: "5\u00AA Ativa\u00E7\u00E3o", category: "ativacoes" },
   111396579: { name: "Consulta Agendada", category: "agendados" },
   111396583: { name: "Consulta Realizada", category: "realizados" },
-  111396587: { name: "Outros Contatos (nao Pacientes)", category: "other" },
+  111396587: { name: "Outros Contatos (n\u00E3o Pacientes)", category: "other" },
   142: { name: "Venda Ganha / Realizada", category: "realizados" },
   143: { name: "Perdidos", category: "perdidos" },
 };
@@ -72,7 +71,6 @@ export async function GET(req: NextRequest) {
       fetchStatusEvents(),
     ]);
 
-    // Montar mapa historico de persistencia por lead: id -> Set<status_id>
     const leadHistoryMap = new Map<number, Set<number>>();
     for (const evt of allEvents) {
       const leadId = Number(evt.entity_id);
@@ -85,7 +83,6 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    // Filtro por Data
     let startTimestamp: number | null = null;
     let endTimestamp: number | null = null;
     const now = new Date();
@@ -113,7 +110,6 @@ export async function GET(req: NextRequest) {
       return true;
     });
 
-    // Metricas Cumulativas com Persistencia Historica
     let criados = 0;
     let ativacoes = 0;
     let resgatados = 0;
@@ -127,12 +123,10 @@ export async function GET(req: NextRequest) {
       const currentStatusId = Number(l.status_id);
       const stageInfo = STAGES[currentStatusId] || { name: `Status ${currentStatusId}`, category: "other" };
 
-      // Obter todos os status por onde esse lead ja passou
       const pastStatuses = leadHistoryMap.get(leadId) || new Set<number>();
       pastStatuses.add(currentStatusId);
 
-      // Verificacoes persistentes
-      const hasTouchedCriados = true; // Todo lead no funil foi criado nele
+      const hasTouchedCriados = true;
       const hasTouchedAtivacoes = ACTIVATION_IDS.some((id) => pastStatuses.has(id));
       const hasTouchedResgatados = pastStatuses.has(111394691);
       const hasTouchedAgendados = pastStatuses.has(111396579);
@@ -171,7 +165,7 @@ export async function GET(req: NextRequest) {
 
     const funnelData = [
       { step: "1. Leads Criados", count: criados, color: "#3B82F6" },
-      { step: "2. Em Ativacao (1 a 5)", count: ativacoes, color: "#06B6D4" },
+      { step: "2. Em Ativa\u00E7\u00E3o (1 a 5)", count: ativacoes, color: "#06B6D4" },
       { step: "3. Leads Resgatados", count: resgatados, color: "#F59E0B" },
       { step: "4. Consultas Agendadas", count: agendados, color: "#8B5CF6" },
       { step: "5. Consultas Realizadas", count: realizados, color: "#10B981" },
@@ -184,12 +178,12 @@ export async function GET(req: NextRequest) {
       total_crm_leads: filteredLeads.length,
       metrics: {
         criados: { value: criados, label: "Leads Criados", change: "Persistente (Total criado)" },
-        resgatados: { value: resgatados, label: "Leads Resgatados", rate: `${taxaResgate}% de resgate (persistente)` },
-        agendados: { value: agendados, label: "Consultas Agendadas", rate: `${taxaAgendamento}% agendados (persistente)` },
-        realizados: { value: realizados, label: "Consultas Realizadas", rate: `${taxaComparecimento}% show-up (persistente)` },
+        resgatados: { value: resgatados, label: "Leads Resgatados", rate: `${taxaResgate}% de resgate` },
+        agendados: { value: agendados, label: "Consultas Agendadas", rate: `${taxaAgendamento}% agendados` },
+        realizados: { value: realizados, label: "Consultas Realizadas", rate: `${taxaComparecimento}% show-up` },
         perdidos: { value: perdidos, label: "Leads Perdidos", rate: `${taxaPerda}% de perda` },
-        contato_futuro: { value: contatoFuturo, label: "Contato Futuro", rate: `${contatoFuturo} contatos passados` },
-        ativacoes: { value: ativacoes, label: "Passaram por Ativacao", rate: "Régua de follow-up" },
+        contato_futuro: { value: contatoFuturo, label: "Contato Futuro", rate: `${contatoFuturo} agendados` },
+        ativacoes: { value: ativacoes, label: "Em Ativa\u00E7\u00E3o (1 a 5)", rate: "R\u00E9gua de follow-up" },
       },
       funnel: funnelData,
       recentLeads: formattedLeads,
