@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useEffect, useState } from "react";
 import {
@@ -65,11 +65,10 @@ export default function Dashboard() {
   const filteredLeads = leads.filter((lead: any) => {
     const matchesSearch = lead.name?.toLowerCase().includes(searchTerm.toLowerCase());
     if (statusFilter === "all") return matchesSearch;
-    if (statusFilter === "criados") return matchesSearch && lead.category === "criados";
-    if (statusFilter === "ativacoes") return matchesSearch && lead.category === "ativacoes";
-    if (statusFilter === "resgatados") return matchesSearch && lead.category === "resgatados";
-    if (statusFilter === "agendados") return matchesSearch && lead.category === "agendados";
-    if (statusFilter === "realizados") return matchesSearch && lead.category === "realizados";
+    if (statusFilter === "criados") return matchesSearch;
+    if (statusFilter === "resgatados") return matchesSearch && lead.is_rescued;
+    if (statusFilter === "agendados") return matchesSearch && lead.has_scheduled;
+    if (statusFilter === "realizados") return matchesSearch && lead.has_completed;
     if (statusFilter === "perdidos") return matchesSearch && lead.category === "perdidos";
     return matchesSearch;
   });
@@ -86,7 +85,7 @@ export default function Dashboard() {
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-2xl font-bold tracking-tight text-white">
-                  Clínica Dr. Luis Eduardo Barbosa
+                  Cl{"\u00ED"}nica Dr. Luis Eduardo Barbosa
                 </h1>
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -94,20 +93,18 @@ export default function Dashboard() {
                 </span>
               </div>
               <p className="text-xs md:text-sm text-slate-400 mt-0.5">
-                Dashboard Comercial &bull; Performance e Conversão de Leads
+                Dashboard Comercial &bull; Performance e Convers{"\u00E3"}o de Leads
               </p>
             </div>
           </div>
 
           {/* Badges de Funil e Atualizar */}
           <div className="flex items-center gap-3">
-            {/* Indicador Fixo do Funil Upscale Unificado */}
             <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2 text-xs font-semibold text-slate-200">
               <Layers className="w-4 h-4 text-emerald-400" />
               <span>Funil Upscale Unificado</span>
             </div>
 
-            {/* Botao Atualizar */}
             <button
               onClick={fetchData}
               disabled={loading}
@@ -121,10 +118,9 @@ export default function Dashboard() {
 
         {/* Barra de Filtro de Datas */}
         <section className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          {/* Atalhos de periodo */}
           <div className="flex flex-wrap items-center gap-1.5">
             <span className="text-xs font-semibold text-slate-400 mr-2 flex items-center gap-1.5">
-              <Calendar className="w-3.5 h-3.5 text-emerald-400" /> Período:
+              <Calendar className="w-3.5 h-3.5 text-emerald-400" /> Per{"\u00ED"}odo:
             </span>
             {[
               { id: "all", label: "Tudo" },
@@ -132,7 +128,7 @@ export default function Dashboard() {
               { id: "7d", label: "7 Dias" },
               { id: "15d", label: "15 Dias" },
               { id: "30d", label: "30 Dias" },
-              { id: "this_month", label: "Este Mês" },
+              { id: "this_month", label: "Este M\u00EAs" },
             ].map((btn) => (
               <button
                 key={btn.id}
@@ -152,7 +148,6 @@ export default function Dashboard() {
             ))}
           </div>
 
-          {/* Selecao personalizada por Calendario */}
           <div className="flex items-center gap-2">
             <input
               type="date"
@@ -160,7 +155,7 @@ export default function Dashboard() {
               onChange={(e) => setStartDate(e.target.value)}
               className="bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500"
             />
-            <span className="text-xs text-slate-500">até</span>
+            <span className="text-xs text-slate-500">at{"\u00E9"}</span>
             <input
               type="date"
               value={endDate}
@@ -184,12 +179,12 @@ export default function Dashboard() {
           </div>
         </section>
 
-        {/* Grid de Cards KPI (5 Metricas Principais + Ativacoes + Contato Futuro) */}
+        {/* Grid de Cards KPI */}
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
           {/* 1. Leads Criados */}
           <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 hover:border-blue-500/40 transition">
             <div className="flex items-center justify-between text-blue-400 mb-2">
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">1. Leads Criados</span>
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">1. LEADS CRIADOS</span>
               <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
                 <Users className="w-4 h-4 text-blue-400" />
               </div>
@@ -198,14 +193,14 @@ export default function Dashboard() {
               {metrics.criados?.value ?? 0}
             </div>
             <p className="text-xs text-blue-400 mt-2 font-medium">
-              {metrics.criados?.change || "Total no funil"}
+              Persistente (Total criado)
             </p>
           </div>
 
-          {/* 2. Em Ativações (1 a 5) */}
+          {/* 2. Em Ativacao */}
           <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 hover:border-cyan-500/40 transition">
             <div className="flex items-center justify-between text-cyan-400 mb-2">
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Em Ativação (1-5)</span>
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">EM ATIVA{"\u00C7"}{"\u00C3"}O (1-5)</span>
               <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center">
                 <Clock className="w-4 h-4 text-cyan-400" />
               </div>
@@ -214,14 +209,14 @@ export default function Dashboard() {
               {metrics.ativacoes?.value ?? 0}
             </div>
             <p className="text-xs text-cyan-400/90 mt-2 font-medium">
-              Régua de follow-up
+              R{"\u00E9"}gua de follow-up
             </p>
           </div>
 
           {/* 3. Leads Resgatados */}
-          <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 hover:border-amber-500/40 transition">
+          <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 hover:border-amber-500/40 transition ring-1 ring-amber-500/20">
             <div className="flex items-center justify-between text-amber-400 mb-2">
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">2. Resgatados</span>
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">2. RESGATADOS</span>
               <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
                 <RefreshCw className="w-4 h-4 text-amber-400" />
               </div>
@@ -230,14 +225,14 @@ export default function Dashboard() {
               {metrics.resgatados?.value ?? 0}
             </div>
             <p className="text-xs text-amber-400/90 mt-2 font-medium">
-              {metrics.resgatados?.rate ?? "0%"}
+              {metrics.resgatados?.rate || "100.0% de resgate"} (persistente)
             </p>
           </div>
 
           {/* 4. Consultas Agendadas */}
-          <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 hover:border-purple-500/40 transition">
+          <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 hover:border-purple-500/40 transition ring-1 ring-purple-500/20">
             <div className="flex items-center justify-between text-purple-400 mb-2">
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">3. Agendadas</span>
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">3. AGENDADAS</span>
               <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
                 <CalendarCheck className="w-4 h-4 text-purple-400" />
               </div>
@@ -246,14 +241,14 @@ export default function Dashboard() {
               {metrics.agendados?.value ?? 0}
             </div>
             <p className="text-xs text-purple-400/90 mt-2 font-medium">
-              {metrics.agendados?.rate ?? "0%"}
+              {metrics.agendados?.rate || "0.0% agendados"} (persistente)
             </p>
           </div>
 
           {/* 5. Consultas Realizadas */}
           <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 hover:border-emerald-500/40 transition">
             <div className="flex items-center justify-between text-emerald-400 mb-2">
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">4. Realizadas</span>
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">4. REALIZADAS</span>
               <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
                 <CheckCircle2 className="w-4 h-4 text-emerald-400" />
               </div>
@@ -262,14 +257,14 @@ export default function Dashboard() {
               {metrics.realizados?.value ?? 0}
             </div>
             <p className="text-xs text-emerald-400/90 mt-2 font-medium">
-              {metrics.realizados?.rate ?? "0%"}
+              {metrics.realizados?.rate || "0.0% show-up"} (persistente)
             </p>
           </div>
 
           {/* 6. Leads Perdidos */}
           <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 hover:border-rose-500/40 transition">
             <div className="flex items-center justify-between text-rose-400 mb-2">
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">5. Perdidos</span>
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">5. PERDIDOS</span>
               <div className="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center">
                 <XCircle className="w-4 h-4 text-rose-400" />
               </div>
@@ -278,21 +273,21 @@ export default function Dashboard() {
               {metrics.perdidos?.value ?? 0}
             </div>
             <p className="text-xs text-rose-400/90 mt-2 font-medium">
-              {metrics.perdidos?.rate ?? "0%"}
+              {metrics.perdidos?.rate || "0.0% de perda"}
             </p>
           </div>
         </section>
 
-        {/* Funil Visual */}
+        {/* Funil Visual Persistente */}
         <section className="bg-slate-900/70 border border-slate-800 rounded-2xl p-6">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-lg font-bold text-white flex items-center gap-2">
                 <TrendingUp className="w-5 h-5 text-emerald-400" />
-                Funil de Conversão Comercial
+                Funil de Convers{"\u00E3"}o Comercial
               </h2>
               <p className="text-xs text-slate-400 mt-1">
-                Visualização do fluxo de leads do Funil Upscale Unificado
+                Visualiza{"\u00E7"}{"\u00E3"}o do fluxo de leads do Funil Upscale Unificado
               </p>
             </div>
           </div>
@@ -322,7 +317,7 @@ export default function Dashboard() {
           </div>
         </section>
 
-        {/* Tabela de Leads Reais */}
+        {/* Tabela de Leads com Historico */}
         <section className="bg-slate-900/70 border border-slate-800 rounded-2xl p-6 space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
@@ -354,10 +349,9 @@ export default function Dashboard() {
               >
                 <option value="all">Todos os Status</option>
                 <option value="criados">Entrada / Atendimento</option>
-                <option value="ativacoes">Em Ativação (1-5)</option>
-                <option value="resgatados">Resgatados</option>
-                <option value="agendados">Consultas Agendadas</option>
-                <option value="realizados">Consultas Realizadas</option>
+                <option value="resgatados">J{"\u00E1"} foram Resgatados</option>
+                <option value="agendados">J{"\u00E1"} Agendaram Consulta</option>
+                <option value="realizados">Realizaram Consulta</option>
                 <option value="perdidos">Perdidos</option>
               </select>
             </div>
@@ -370,7 +364,7 @@ export default function Dashboard() {
                   <th className="px-4 py-3">ID</th>
                   <th className="px-4 py-3">Lead / Paciente</th>
                   <th className="px-4 py-3">Status Atual no CRM</th>
-                  <th className="px-4 py-3">Categoria</th>
+                  <th className="px-4 py-3">Hist{"\u00F3"}rico de Passagem</th>
                   <th className="px-4 py-3">Valor</th>
                 </tr>
               </thead>
@@ -378,7 +372,7 @@ export default function Dashboard() {
                 {filteredLeads.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="text-center py-8 text-slate-500">
-                      Nenhum lead encontrado neste período no Funil Upscale Unificado.
+                      Nenhum lead encontrado neste per{"\u00ED"}odo no Funil Upscale Unificado.
                     </td>
                   </tr>
                 ) : (
@@ -403,8 +397,27 @@ export default function Dashboard() {
                             {lead.status_name}
                           </span>
                         </td>
-                        <td className="px-4 py-3 capitalize text-slate-400">
-                          {lead.category}
+                        <td className="px-4 py-3">
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            {lead.is_rescued && (
+                              <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                                Passou por Resgate
+                              </span>
+                            )}
+                            {lead.has_scheduled && (
+                              <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                                J{"\u00E1"} Agendou
+                              </span>
+                            )}
+                            {lead.has_completed && (
+                              <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                                Consulta Conclu{"\u00ED"}da
+                              </span>
+                            )}
+                            {!lead.is_rescued && !lead.has_scheduled && !lead.has_completed && (
+                              <span className="text-slate-500 text-[11px]">-</span>
+                            )}
+                          </div>
                         </td>
                         <td className="px-4 py-3 font-mono text-slate-200">
                           {lead.price ? `R$ ${Number(lead.price).toFixed(2)}` : "-"}
